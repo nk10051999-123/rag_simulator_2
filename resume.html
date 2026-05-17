@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rishabh Shukla | Futuristic Resume</title>
+  <style>
+    :root {
+      --bg: #070a12;
+      --panel: rgba(255, 255, 255, 0.075);
+      --panel-strong: rgba(255, 255, 255, 0.12);
+      --text: #f5f7fb;
+      --muted: #aab4c8;
+      --line: rgba(255, 255, 255, 0.16);
+      --accent: #5cf2ff;
+      --accent-2: #9b7cff;
+      --accent-3: #f35665;
+      --chip: rgba(92, 242, 255, 0.12);
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+    }
+
+    [data-theme="light"] {
+      --bg: #f5f8ff;
+      --panel: rgba(255, 255, 255, 0.78);
+      --panel-strong: rgba(255, 255, 255, 0.96);
+      --text: #111827;
+      --muted: #4b5563;
+      --line: rgba(17, 24, 39, 0.14);
+      --accent: #006dff;
+      --accent-2: #7c3aed;
+      --accent-3: #d92d20;
+      --chip: rgba(0, 109, 255, 0.09);
+      --shadow: 0 24px 70px rgba(24, 39, 75, 0.13);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 12% 8%, rgba(92, 242, 255, 0.25), transparent 32%),
+        radial-gradient(circle at 86% 14%, rgba(155, 124, 255, 0.22), transparent 34%),
+        radial-gradient(circle at 50% 100%, rgba(243, 86, 101, 0.16), transparent 35%),
+        var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,0.95), transparent 85%);
+      z-index: 0;
+    }
+
+    .cursor-glow {
+      position: fixed;
+      width: 280px;
+      height: 280px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(92, 242, 255, 0.16), transparent 65%);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 1;
+      transition: opacity 0.3s ease;
+    }
+
+    .page {
+      width: min(1180px, calc(100% - 36px));
+      margin: 32px auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .brand-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 0 20px var(--accent);
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      backdrop-filter: blur(16px);
+      font-weight: 650;
+      font-size: 13px;
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      border-color: rgba(92, 242, 255, 0.6);
+      background: var(--panel-strong);
+    }
+
+    .resume-shell {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 18px;
+      background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.035));
+      border: 1px solid var(--line);
+      border-radius: 34px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(26px);
+      padding: 18px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .resume-shell::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(115deg, transparent 0%, rgba(92, 242, 255, 0.08) 35%, transparent 55%);
+      transform: translateX(-80%);
+      animation: shimmer 9s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes shimmer {
+      0%, 72% { transform: translateX(-90%); }
+      100% { transform: translateX(110%); }
+    }
+
+    aside, main {
+      position: relative;
+      z-index: 2;
+    }
+
+    aside {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      padding: 26px;
+    }
+
+    [data-theme="light"] aside {
+      background: rgba(255, 255, 255, 0.54);
+    }
+
+    .profile-card {
+      margin-bottom: 28px;
+    }
+
+    .avatar {
+      width: 86px;
+      height: 86px;
+      border-radius: 28px;
+      background:
+        linear-gradient(135deg, rgba(92, 242, 255, 0.24), rgba(155, 124, 255, 0.24)),
+        linear-gradient(135deg, var(--accent), var(--accent-2));
+      display: grid;
+      place-items: center;
+      font-size: 30px;
+      font-weight: 850;
+      margin-bottom: 18px;
+      border: 1px solid rgba(255,255,255,0.22);
+      box-shadow: 0 18px 50px rgba(92, 242, 255, 0.18);
+    }
+
+    h1 {
+      font-size: clamp(38px, 6vw, 76px);
+      line-height: 0.92;
+      letter-spacing: -0.07em;
+      margin-bottom: 14px;
+    }
+
+    h1 span {
+      display: block;
+      background: linear-gradient(135deg, var(--text), var(--accent));
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .role {
+      color: var(--accent);
+      font-weight: 750;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 12px;
+      margin-bottom: 14px;
+    }
+
+    .summary {
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .contact-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 22px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .contact-list a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .contact-list a:hover {
+      color: var(--accent);
+    }
+
+    .section {
+      margin-top: 28px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text);
+      margin-bottom: 14px;
+      font-weight: 850;
+    }
+
+    .section-title::before {
+      content: "";
+      width: 26px;
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+    }
+
+    .chip {
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: var(--chip);
+      border: 1px solid rgba(92, 242, 255, 0.16);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .mini-list {
+      display: grid;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .mini-list strong {
+      display: block;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    main {
+      padding: 28px 28px 28px 10px;
+    }
+
+    .hero {
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 26px;
+      padding-bottom: 26px;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .metric {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 16px;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 24px;
+      line-height: 1;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+      display: block;
+    }
+
+    .content-grid {
+      display: grid;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 22px;
+      transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(92, 242, 255, 0.38);
+      background: var(--panel-strong);
+    }
+
+    .experience-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 12px;
+      align-items: flex-start;
+    }
+
+    .experience-head h3 {
+      font-size: 21px;
+      letter-spacing: -0.03em;
+    }
+
+    .experience-head p {
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 2px;
+    }
+
+    .date-pill {
+      white-space: nowrap;
+      color: var(--accent);
+      border: 1px solid rgba(92, 242, 255, 0.24);
+      background: rgba(92, 242, 255, 0.08);
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    ul {
+      list-style: none;
+      display: grid;
+      gap: 9px;
+    }
+
+    li {
+      color: var(--muted);
+      font-size: 14.5px;
+      position: relative;
+      padding-left: 18px;
+    }
+
+    li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.72em;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 0 16px rgba(92, 242, 255, 0.45);
+    }
+
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .project {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 16px;
+      background: rgba(255,255,255,0.04);
+    }
+
+    .project h4 {
+      font-size: 15px;
+      margin-bottom: 7px;
+    }
+
+    .project p {
+      color: var(--muted);
+      font-size: 13.5px;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 14px;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .timeline-date {
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+    }
+
+    .timeline-body {
+      border-left: 1px solid var(--line);
+      padding-left: 16px;
+    }
+
+    .timeline-body strong {
+      display: block;
+      color: var(--text);
+      margin-bottom: 3px;
+    }
+
+    .timeline-body span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .footer-note {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 18px;
+    }
+
+    @media (max-width: 980px) {
+      .resume-shell {
+        grid-template-columns: 1fr;
+      }
+
+      main {
+        padding: 18px 4px 4px;
+      }
+
+      aside {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+
+      .profile-card {
+        grid-column: 1 / -1;
+      }
+
+      .metric-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page {
+        width: min(100% - 20px, 1180px);
+        margin: 14px auto;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .resume-shell {
+        padding: 10px;
+        border-radius: 24px;
+      }
+
+      aside {
+        grid-template-columns: 1fr;
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 48px;
+      }
+
+      .project-grid,
+      .metric-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .experience-head {
+        flex-direction: column;
+      }
+
+      .timeline-item {
+        grid-template-columns: 1fr;
+        gap: 4px;
+      }
+    }
+
+    @media print {
+      :root {
+        --bg: #ffffff;
+        --panel: #ffffff;
+        --panel-strong: #ffffff;
+        --text: #111827;
+        --muted: #374151;
+        --line: #d1d5db;
+        --accent: #003aac;
+        --accent-2: #08243f;
+        --chip: #eef4ff;
+      }
+
+      body {
+        background: #ffffff;
+      }
+
+      body::before,
+      .cursor-glow,
+      .topbar,
+      .resume-shell::after {
+        display: none !important;
+      }
+
+      .page {
+        width: 100%;
+        margin: 0;
+      }
+
+      .resume-shell {
+        box-shadow: none;
+        border: 0;
+        border-radius: 0;
+        padding: 0;
+        grid-template-columns: 32% 68%;
+      }
+
+      aside, .card, .metric, .project {
+        break-inside: avoid;
+      }
+
+      aside {
+        border-radius: 0;
+        border: 0;
+        border-right: 1px solid var(--line);
+        background: #f7f9fc;
+      }
+
+      main {
+        padding: 20px;
+      }
+
+      .card:hover {
+        transform: none;
+      }
+    }
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="cursor-glow" id="cursorGlow"></div>
+
+  <div class="page">
+    <div class="topbar">
+      <div class="brand"><span class="brand-dot"></span> Futuristic Resume System</div>
+      <div class="actions">
+        <button id="themeToggle" type="button">Switch Theme</button>
+        <button onclick="window.print()" type="button">Download / Print PDF</button>
+      </div>
+    </div>
+
+    <div class="resume-shell">
+      <aside>
+        <section class="profile-card">
+          <div class="avatar">RS</div>
+          <div class="role">Consulting Analyst | Product Strategy | Market Intelligence</div>
+          <p class="summary">
+            Consulting and product strategy professional focused on converting market research, competitive intelligence, and stakeholder inputs into CXO-ready insights, strategic narratives, and high-impact product and investment recommendations.
+          </p>
+          <div class="contact-list">
+            <a href="mailto:rishabhshukla12.53@gmail.com">rishabhshukla12.53@gmail.com</a>
+            <a href="https://www.linkedin.com/in/your-linkedin" target="_blank" rel="noreferrer">LinkedIn: add your profile URL</a>
+            <span>India | Open to consulting, product strategy, and market intelligence roles</span>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title">Core Skills</h2>
+          <div class="chips">
+            <span class="chip">Business Intelligence</span>
+            <span class="chip">Market Research</span>
+            <span class="chip">Product Sense</span>
+            <span class="chip">Product Strategy</span>
+            <span class="chip">Competitive Intelligence</span>
+            <span class="chip">ABM Profiling</span>
+            <span class="chip">SWOT Analysis</span>
+            <span class="chip">Benchmarking</span>
+            <span class="chip">CXO Storytelling</span>
+            <span class="chip">Strategic Research</span>
+            <span class="chip">Opportunity Mapping</span>
+            <span class="chip">Stakeholder Analysis</span>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title">Tools & Methods</h2>
+          <div class="mini-list">
+            <div><strong>Research Methods</strong>Primary research, secondary research, expert scan, competitor tracking, market sizing, trend analysis</div>
+            <div><strong>Product Methods</strong>PRDs, user segmentation, prioritization frameworks, prototypes, hypothesis validation, success metrics</div>
+            <div><strong>Deliverables</strong>Executive decks, strategy reports, market briefs, benchmarking studies, client-ready narratives</div>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title">Education</h2>
+          <div class="mini-list">
+            <div><strong>Amity University UK</strong>Add degree, specialization, and year</div>
+            <div><strong>Continuous Learning</strong>AI-native enterprise strategy, edge AI, sovereign AI, GCC investment strategy, product management</div>
+          </div>
+        </section>
+      </aside>
+
+      <main>
+        <section class="hero">
+          <h1>Rishabh <span>Shukla</span></h1>
+          <p class="summary">
+            I build consulting-grade research, product strategy, and market intelligence outputs that help leaders identify opportunities, understand competitive shifts, and make sharper investment and roadmap decisions.
+          </p>
+          <div class="hero-meta">
+            <span class="chip">CXO-ready insights</span>
+            <span class="chip">Sector strategy</span>
+            <span class="chip">AI + digital transformation</span>
+            <span class="chip">Government and enterprise advisory</span>
+          </div>
+          <div class="metric-grid">
+            <div class="metric"><strong>30+</strong><span>engagements supported across research, discovery, and strategy</span></div>
+            <div class="metric"><strong>6</strong><span>flagship reports delivered across Perspective and Spotlight formats</span></div>
+            <div class="metric"><strong>100%</strong><span>on-time delivery across key consulting and report workstreams</span></div>
+            <div class="metric"><strong>Multi-sector</strong><span>experience across petrochemicals, retail, healthcare, AI, GCC zones, and banking UX</span></div>
+          </div>
+        </section>
+
+        <div class="content-grid">
+          <section class="card">
+            <div class="experience-head">
+              <div>
+                <h3>Consulting Analyst</h3>
+                <p>Company Name | Strategy, Research, Product and Market Intelligence</p>
+              </div>
+              <span class="date-pill">Add dates</span>
+            </div>
+            <ul>
+              <li>Led product discovery and problem-framing across 30+ engagements using primary research, ABM profiling, and secondary data to identify user needs, market gaps, and high-impact opportunity areas.</li>
+              <li>Developed market and competitive intelligence outputs including SWOT analysis, competitor benchmarking, trend analysis, opportunity scans, and strategic positioning recommendations.</li>
+              <li>Converted complex research findings into practical product insights, roadmap inputs, investment narratives, and executive-ready recommendations for business and government stakeholders.</li>
+              <li>Supported client decision-making and lead generation by building clear, evidence-led narratives that helped senior leaders assess options, trade-offs, and strategic outcomes.</li>
+              <li>Collaborated on sector-level strategy work with stakeholders including the Government of Oman, with focus areas across pharma, medical devices, free zones, FDI, and industrial ecosystems.</li>
+            </ul>
+          </section>
+
+          <section class="card">
+            <div class="experience-head">
+              <div>
+                <h3>Associate</h3>
+                <p>Company Name | Research, Intelligence and Client Deliverables</p>
+              </div>
+              <span class="date-pill">Previous role</span>
+            </div>
+            <ul>
+              <li>Produced consulting-grade decks and reports across petrochemicals, retail, healthcare, banking UX, GCC investment strategy, and AI transformation themes.</li>
+              <li>Supported Lenovo-related consulting deliverables and client discussions, contributing to requirements understanding, sector analysis, and executive presentation development.</li>
+              <li>Created insight-rich blogs, LinkedIn posts, and report summaries to improve content reach and translate research into business-facing narratives.</li>
+            </ul>
+          </section>
+
+          <section class="card">
+            <h2 class="section-title">Selected Strategy Work</h2>
+            <div class="project-grid">
+              <div class="project">
+                <h4>AI at the Edge Report Series</h4>
+                <p>Built the strategic narrative on what is new in edge AI, covering small generative models, multimodal reasoning, agentic workflows, orchestration, and practical local adaptation.</p>
+              </div>
+              <div class="project">
+                <h4>AI-Native Enterprise Roadmap</h4>
+                <p>Reframed an enterprise AI strategy report into a sharper Gartner-style structure covering why AI-native matters, workload prioritization, operating model shifts, and 24-month leadership agenda.</p>
+              </div>
+              <div class="project">
+                <h4>RAKEZ Furniture Investment Narrative</h4>
+                <p>Developed UAE furniture market and investment storylines linking real estate, hospitality, branded residences, imports, localization opportunity, and RAKEZ sector positioning.</p>
+              </div>
+              <div class="project">
+                <h4>Oman Pharma and Medical Devices Strategy</h4>
+                <p>Created free-zone and investment narratives around OPAZ, Duqm, Salalah, India-Oman CEPA, anchor projects, ecosystem pathways, and investor feedback mechanisms.</p>
+              </div>
+              <div class="project">
+                <h4>Sovereign AI Case Study Research</h4>
+                <p>Mapped non-tech enterprise users, operators, and vendors leveraging hyperscaler ecosystems for sovereign AI, with emphasis on sovereignty requirements and revenue-linked impact.</p>
+              </div>
+              <div class="project">
+                <h4>Banking UX Benchmarking</h4>
+                <p>Benchmarked Re-KYC, limit enhancement, card limits, and customer communication journeys across banking channels including app, website, SMS, WhatsApp, IVR, and branch.</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2 class="section-title">Product Strategy Portfolio</h2>
+            <ul>
+              <li>Created PRD-style product assignments covering business context, user segmentation, problem framing, prioritization, prototype logic, success metrics, and risk mitigation.</li>
+              <li>Worked on product-sense cases across Spotify, Instagram, Zomato, and Pronto, focusing on discovery fatigue, personalization control, order regret, retention, onboarding, and user experience gaps.</li>
+              <li>Built outreach-ready product narratives to connect prototype concepts with business outcomes such as customer retention, onboarding improvement, engagement, and product adoption.</li>
+            </ul>
+          </section>
+
+          <section class="card">
+            <h2 class="section-title">Impact Themes</h2>
+            <div class="timeline">
+              <div class="timeline-item">
+                <div class="timeline-date">Strategy</div>
+                <div class="timeline-body"><strong>Sharper decision support</strong><span>Turned fragmented market data into structured recommendations for executive decision-making.</span></div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-date">Research</div>
+                <div class="timeline-body"><strong>Evidence-led market intelligence</strong><span>Combined primary inputs, secondary sources, trend scans, and competitive benchmarking to identify opportunity spaces.</span></div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-date">Product</div>
+                <div class="timeline-body"><strong>User-backed problem framing</strong><span>Applied product discovery and PRD methods to connect observed pain points with practical solution pathways.</span></div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-date">Content</div>
+                <div class="timeline-body"><strong>Executive-grade storytelling</strong><span>Created concise, polished, and insight-led outputs designed for CXO, CIO, CFO, investor, and stakeholder audiences.</span></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2 class="section-title">Professional Positioning</h2>
+            <p class="summary">
+              Best suited for roles at the intersection of consulting, product strategy, market intelligence, and digital transformation — especially where complex research must be translated into boardroom-ready narratives, commercial opportunities, and execution-focused recommendations.
+            </p>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <p class="footer-note">Edit placeholders for company name, dates, degree, and LinkedIn URL before sending.</p>
+  </div>
+
+  <script>
+    const body = document.body;
+    const themeToggle = document.getElementById('themeToggle');
+    const cursorGlow = document.getElementById('cursorGlow');
+
+    themeToggle.addEventListener('click', () => {
+      const current = body.getAttribute('data-theme');
+      body.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+    });
+
+    window.addEventListener('mousemove', (event) => {
+      cursorGlow.style.left = event.clientX + 'px';
+      cursorGlow.style.top = event.clientY + 'px';
+    });
+
+    window.addEventListener('mouseleave', () => {
+      cursorGlow.style.opacity = '0';
+    });
+
+    window.addEventListener('mouseenter', () => {
+      cursorGlow.style.opacity = '1';
+    });
+  </script>
+</body>
+</html>
