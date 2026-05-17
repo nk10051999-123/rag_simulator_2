@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RAG Simulator | Interactive Learning Lab</title>
+  <style>
+    :root {
+      --bg: #07101f;
+      --panel: rgba(255, 255, 255, 0.08);
+      --panel-strong: rgba(255, 255, 255, 0.13);
+      --text: #f6f9ff;
+      --muted: #9fb0cc;
+      --line: rgba(255, 255, 255, 0.15);
+      --accent: #63e6ff;
+      --accent-2: #a78bfa;
+      --accent-3: #38f8a6;
+      --warning: #ffcf5c;
+      --danger: #ff6b8a;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
+      --radius: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 12% 8%, rgba(99, 230, 255, 0.22), transparent 30%),
+        radial-gradient(circle at 90% 4%, rgba(167, 139, 250, 0.20), transparent 34%),
+        radial-gradient(circle at 50% 100%, rgba(56, 248, 166, 0.12), transparent 34%),
+        var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(to bottom, black, transparent 82%);
+      z-index: 0;
+    }
+
+    .orb {
+      position: fixed;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(99, 230, 255, 0.15), transparent 68%);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 1;
+      transition: opacity 0.2s ease;
+    }
+
+    .app {
+      width: min(1320px, calc(100% - 32px));
+      margin: 28px auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 20px;
+      align-items: stretch;
+      margin-bottom: 20px;
+    }
+
+    .hero-card,
+    .panel,
+    .step-card,
+    .answer-box,
+    .chunk-card {
+      border: 1px solid var(--line);
+      background: linear-gradient(145deg, rgba(255,255,255,0.10), rgba(255,255,255,0.045));
+      backdrop-filter: blur(24px);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+    }
+
+    .hero-card {
+      padding: 34px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero-card::after {
+      content: "RAG";
+      position: absolute;
+      right: -20px;
+      bottom: -52px;
+      font-size: 170px;
+      font-weight: 950;
+      letter-spacing: -0.12em;
+      color: rgba(255,255,255,0.045);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-weight: 800;
+      font-size: 12px;
+      margin-bottom: 14px;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--accent-3);
+      box-shadow: 0 0 18px var(--accent-3);
+    }
+
+    h1 {
+      font-size: clamp(42px, 7vw, 92px);
+      line-height: 0.92;
+      letter-spacing: -0.075em;
+      margin-bottom: 18px;
+      max-width: 850px;
+    }
+
+    h1 span {
+      background: linear-gradient(135deg, var(--text), var(--accent), var(--accent-2));
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 16px;
+      max-width: 800px;
+    }
+
+    .hero-side {
+      padding: 24px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 20px;
+      padding: 18px;
+    }
+
+    .metric strong {
+      display: block;
+      color: var(--accent);
+      font-size: 24px;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .panel {
+      padding: 22px;
+      position: sticky;
+      top: 20px;
+    }
+
+    .panel h2,
+    .section-title {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--text);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .panel h2::before,
+    .section-title::before {
+      content: "";
+      width: 26px;
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    }
+
+    label {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      margin: 16px 0 8px;
+    }
+
+    textarea,
+    input,
+    select {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: rgba(0, 0, 0, 0.22);
+      color: var(--text);
+      border-radius: 16px;
+      padding: 13px 14px;
+      outline: none;
+      font: inherit;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    textarea:focus,
+    input:focus,
+    select:focus {
+      border-color: rgba(99, 230, 255, 0.58);
+      background: rgba(0, 0, 0, 0.30);
+    }
+
+    textarea {
+      min-height: 180px;
+      resize: vertical;
+    }
+
+    select option {
+      background: #07101f;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--text);
+      padding: 11px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 800;
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      border-color: rgba(99, 230, 255, 0.65);
+      background: var(--panel-strong);
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, rgba(99, 230, 255, 0.25), rgba(167, 139, 250, 0.22));
+      border-color: rgba(99, 230, 255, 0.44);
+    }
+
+    button.success {
+      background: rgba(56, 248, 166, 0.14);
+      border-color: rgba(56, 248, 166, 0.35);
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 12.5px;
+      margin-top: 10px;
+    }
+
+    .pipeline {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(120px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .pipe-node {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 18px;
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+    }
+
+    .pipe-node.active {
+      transform: translateY(-3px);
+      border-color: rgba(99, 230, 255, 0.70);
+      background: linear-gradient(145deg, rgba(99, 230, 255, 0.18), rgba(167, 139, 250, 0.10));
+    }
+
+    .pipe-node.done {
+      border-color: rgba(56, 248, 166, 0.45);
+    }
+
+    .pipe-node .num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: rgba(99, 230, 255, 0.12);
+      color: var(--accent);
+      font-weight: 900;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+
+    .pipe-node h3 {
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .pipe-node p {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .step-grid {
+      display: grid;
+      gap: 20px;
+    }
+
+    .step-card {
+      padding: 22px;
+      display: none;
+      animation: rise 0.35s ease both;
+    }
+
+    .step-card.visible {
+      display: block;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .step-head h2 {
+      font-size: 24px;
+      letter-spacing: -0.04em;
+    }
+
+    .step-head p {
+      color: var(--muted);
+      max-width: 780px;
+      margin-top: 5px;
+    }
+
+    .tag {
+      white-space: nowrap;
+      border: 1px solid rgba(99, 230, 255, 0.28);
+      color: var(--accent);
+      background: rgba(99, 230, 255, 0.08);
+      border-radius: 999px;
+      padding: 8px 11px;
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .data-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .data-box {
+      border: 1px solid var(--line);
+      background: rgba(0, 0, 0, 0.18);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .data-box h4 {
+      font-size: 14px;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .data-box p,
+    .data-box li {
+      color: var(--muted);
+      font-size: 13.5px;
+    }
+
+    .chunk-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .chunk-card {
+      padding: 16px;
+      box-shadow: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .chunk-card.retrieved {
+      border-color: rgba(56, 248, 166, 0.46);
+      background: rgba(56, 248, 166, 0.09);
+    }
+
+    .chunk-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 850;
+      margin-bottom: 8px;
+    }
+
+    .chunk-card p {
+      color: var(--muted);
+      font-size: 13.5px;
+    }
+
+    .score-bar {
+      height: 7px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.10);
+      margin-top: 12px;
+      overflow: hidden;
+    }
+
+    .score-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent), var(--accent-3));
+      transition: width 0.5s ease;
+    }
+
+    .vector-wrap {
+      display: grid;
+      gap: 12px;
+    }
+
+    .vector-row {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .vector-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .vector {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 6px;
+    }
+
+    .vector-cell {
+      height: 22px;
+      border-radius: 8px;
+      background: rgba(99, 230, 255, 0.08);
+      border: 1px solid rgba(99, 230, 255, 0.12);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .vector-cell::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      height: var(--h, 30%);
+      background: linear-gradient(180deg, var(--accent), var(--accent-2));
+      opacity: 0.75;
+    }
+
+    .answer-box {
+      padding: 20px;
+      box-shadow: none;
+      background: linear-gradient(145deg, rgba(56, 248, 166, 0.10), rgba(99, 230, 255, 0.07));
+    }
+
+    .answer-box h3 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .answer-box p {
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .citation-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .citation {
+      border: 1px solid rgba(56, 248, 166, 0.28);
+      color: var(--accent-3);
+      background: rgba(56, 248, 166, 0.08);
+      padding: 7px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .compare {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .compare .data-box:first-child {
+      border-color: rgba(255, 107, 138, 0.28);
+    }
+
+    .compare .data-box:last-child {
+      border-color: rgba(56, 248, 166, 0.28);
+    }
+
+    .code-pill {
+      color: var(--accent);
+      background: rgba(99, 230, 255, 0.09);
+      border: 1px solid rgba(99, 230, 255, 0.16);
+      padding: 2px 6px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .empty-state {
+      color: var(--muted);
+      border: 1px dashed var(--line);
+      border-radius: 18px;
+      padding: 20px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    @media (max-width: 1080px) {
+      .hero,
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .panel {
+        position: relative;
+        top: auto;
+      }
+
+      .pipeline {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 680px) {
+      .app {
+        width: min(100% - 18px, 1320px);
+        margin: 12px auto;
+      }
+
+      .hero-card,
+      .panel,
+      .step-card {
+        padding: 18px;
+      }
+
+      h1 {
+        font-size: 48px;
+      }
+
+      .pipeline,
+      .data-grid,
+      .compare {
+        grid-template-columns: 1fr;
+      }
+
+      .step-head {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="orb" id="orb"></div>
+
+  <div class="app">
+    <section class="hero">
+      <div class="hero-card">
+        <div class="eyebrow">Interactive learning lab</div>
+        <h1>RAG <span>Simulator</span></h1>
+        <p>
+          Explore how Retrieval-Augmented Generation works from document ingestion to final answer generation. This single-file simulator uses simple keyword-based scoring to mimic the RAG pipeline, so you can understand the logic without needing a real vector database or LLM API.
+        </p>
+      </div>
+      <div class="hero-side hero-card">
+        <div class="metric"><strong>01</strong><span>Upload or select a knowledge document</span></div>
+        <div class="metric"><strong>02</strong><span>Split it into chunks and create simulated embeddings</span></div>
+        <div class="metric"><strong>03</strong><span>Retrieve relevant chunks and generate a grounded answer</span></div>
+      </div>
+    </section>
+
+    <section class="layout">
+      <aside class="panel">
+        <h2>Control Center</h2>
+
+        <label for="sampleSelect">Choose sample knowledge base</label>
+        <select id="sampleSelect">
+          <option value="edge">AI at the Edge</option>
+          <option value="sovereign">Sovereign AI</option>
+          <option value="banking">Banking UX Benchmarking</option>
+          <option value="custom">Custom document</option>
+        </select>
+
+        <label for="documentInput">Knowledge document</label>
+        <textarea id="documentInput"></textarea>
+        <p class="hint">Tip: Paste any report, article, policy note, or research section to simulate RAG on your own content.</p>
+
+        <label for="queryInput">User question</label>
+        <input id="queryInput" value="What is new about AI at the edge?" />
+
+        <label for="chunkSize">Chunk size</label>
+        <select id="chunkSize">
+          <option value="40">Small chunks</option>
+          <option value="70" selected>Balanced chunks</option>
+          <option value="110">Large chunks</option>
+        </select>
+
+        <label for="topK">Chunks to retrieve</label>
+        <select id="topK">
+          <option value="2">Top 2</option>
+          <option value="3" selected>Top 3</option>
+          <option value="4">Top 4</option>
+        </select>
+
+        <div class="btn-row">
+          <button class="primary" id="runAllBtn">Run full RAG</button>
+          <button id="nextStepBtn">Next step</button>
+          <button id="resetBtn">Reset</button>
+        </div>
+        <p class="hint">Use “Next step” to learn slowly, or “Run full RAG” to see the complete pipeline instantly.</p>
+      </aside>
+
+      <main>
+        <section class="pipeline" id="pipeline">
+          <div class="pipe-node" data-step="1"><div class="num">1</div><h3>Ingest</h3><p>Load the source document</p></div>
+          <div class="pipe-node" data-step="2"><div class="num">2</div><h3>Chunk</h3><p>Break content into passages</p></div>
+          <div class="pipe-node" data-step="3"><div class="num">3</div><h3>Embed</h3><p>Represent meaning as vectors</p></div>
+          <div class="pipe-node" data-step="4"><div class="num">4</div><h3>Retrieve</h3><p>Find relevant context</p></div>
+          <div class="pipe-node" data-step="5"><div class="num">5</div><h3>Generate</h3><p>Answer using retrieved context</p></div>
+        </section>
+
+        <section class="step-grid">
+          <article class="step-card" id="step1">
+            <div class="step-head">
+              <div>
+                <h2>Step 1 — Ingest the knowledge source</h2>
+                <p>The system first receives source knowledge. In a real enterprise RAG system, this could come from PDFs, web pages, policies, tickets, call transcripts, reports, or internal documents.</p>
+              </div>
+              <span class="tag">Source loading</span>
+            </div>
+            <div class="data-grid">
+              <div class="data-box">
+                <h4>What RAG is doing</h4>
+                <p>It prepares external knowledge so the model does not rely only on its pre-trained memory. This is what makes answers more current, specific, and grounded.</p>
+              </div>
+              <div class="data-box">
+                <h4>Input document preview</h4>
+                <p id="docPreview"></p>
+              </div>
+            </div>
+          </article>
+
+          <article class="step-card" id="step2">
+            <div class="step-head">
+              <div>
+                <h2>Step 2 — Chunk the document</h2>
+                <p>The document is split into smaller passages. Good chunking helps retrieval accuracy because each chunk should contain one meaningful idea instead of an entire report.</p>
+              </div>
+              <span class="tag">Text splitting</span>
+            </div>
+            <div id="chunkList" class="chunk-list"></div>
+          </article>
+
+          <article class="step-card" id="step3">
+            <div class="step-head">
+              <div>
+                <h2>Step 3 — Create simulated embeddings</h2>
+                <p>In a real RAG system, an embedding model converts text into vectors that capture semantic meaning. This simulator creates visual vectors to show the idea.</p>
+              </div>
+              <span class="tag">Vectorization</span>
+            </div>
+            <div class="data-grid">
+              <div class="data-box">
+                <h4>What an embedding represents</h4>
+                <p>An embedding is a numeric representation of meaning. Similar questions and chunks should land close to each other in vector space.</p>
+              </div>
+              <div class="data-box">
+                <h4>Why this matters</h4>
+                <p>Retrieval does not simply search exact words. It attempts to find passages that are meaningfully related to the question.</p>
+              </div>
+            </div>
+            <div class="vector-wrap" id="vectorWrap" style="margin-top:14px;"></div>
+          </article>
+
+          <article class="step-card" id="step4">
+            <div class="step-head">
+              <div>
+                <h2>Step 4 — Retrieve the most relevant chunks</h2>
+                <p>The user question is compared with the stored chunks. The highest-scoring passages become the context window for the generator.</p>
+              </div>
+              <span class="tag">Context retrieval</span>
+            </div>
+            <div id="retrievalList" class="chunk-list"></div>
+          </article>
+
+          <article class="step-card" id="step5">
+            <div class="step-head">
+              <div>
+                <h2>Step 5 — Generate a grounded answer</h2>
+                <p>The generator uses the retrieved context to answer the question. The goal is to reduce hallucination by making the answer depend on source-backed evidence.</p>
+              </div>
+              <span class="tag">Answer synthesis</span>
+            </div>
+            <div class="answer-box">
+              <h3>Generated answer</h3>
+              <p id="generatedAnswer"></p>
+              <div class="citation-row" id="citations"></div>
+            </div>
+            <div class="compare">
+              <div class="data-box">
+                <h4>Without RAG</h4>
+                <p>The model may answer from generic training knowledge. This can be vague, outdated, or unsupported by your specific source.</p>
+              </div>
+              <div class="data-box">
+                <h4>With RAG</h4>
+                <p>The model first retrieves relevant source passages, then writes an answer using that context and can show which chunks informed the response.</p>
+              </div>
+            </div>
+          </article>
+        </section>
+      </main>
+    </section>
+  </div>
+
+  <script>
+    const samples = {
+      edge: `Enterprises have used edge computing and narrow AI models for years, especially for computer vision, anomaly detection, and industrial monitoring. What is new now is the convergence of small generative models, multimodal reasoning, agentic workflows, better orchestration, and local adaptation. Together, these capabilities move the edge from narrow prediction to contextual action. Small models can run on devices or on-prem environments, reducing latency, improving privacy, and lowering dependency on constant cloud connectivity. Multimodal AI allows systems to combine video, sensor, text, audio, and operational context. Agentic workflows can trigger actions such as opening a maintenance ticket, adjusting a machine setting, or escalating an incident. For infrastructure-heavy enterprises, AI at the edge can balance latency, cost, resilience, sovereignty, and operational performance. The biggest early benefits are expected in manufacturing, energy, healthcare, retail, logistics, transport networks, smart buildings, campuses, and cities.`,
+      sovereign: `Sovereign AI focuses on the ability of organizations and governments to control where data is stored, who can access it, how systems operate, and how resilient the AI stack is under regulatory, geopolitical, or operational stress. Key requirements include data sovereignty, data residency, operational sovereignty, operator access restriction, independence, transparency, resilience, and survivability. Enterprises adopting sovereign AI often want to use advanced AI while meeting local compliance, sector regulation, customer trust, and risk management requirements. Practical implementations may include local cloud regions, dedicated environments, confidential computing, strict access controls, audit logs, encryption, model governance, and workload portability. The business value is not only compliance. Sovereign AI can also support customer engagement, regulated market entry, public-sector eligibility, enterprise trust, and revenue protection.`,
+      banking: `Banking UX benchmarking assesses how clearly banks help customers complete important journeys such as Re-KYC, credit limit enhancement, transfer limit changes, overdraft requests, and card controls. Strong journeys provide clear entry points, current versus eligible limit previews, fees, timelines, eligibility criteria, document requirements, consent flows, approval or rejection explanations, and status tracking. Weak journeys hide options inside settings, require too many clicks, repeat user inputs, or fail to explain why a request is rejected. Best-practice channels include mobile app, website, SMS, email, WhatsApp, IVR, and branch support. A good banking journey should combine security and compliance with simplicity, personalization, contextual nudges, failure handling, and post-request communication.`,
+      custom: ``
+    };
+
+    const defaultQuestions = {
+      edge: 'What is new about AI at the edge?',
+      sovereign: 'What are the main requirements of sovereign AI?',
+      banking: 'What makes a strong banking UX journey?'
+    };
+
+    const stopWords = new Set(['the','is','a','an','and','or','of','to','in','for','on','with','as','by','it','this','that','are','be','from','into','can','how','what','why','where','who','which','has','have','had','not','only','also','such','than','then','their','its','they','them','these','those','your','you','we','at']);
+
+    const sampleSelect = document.getElementById('sampleSelect');
+    const documentInput = document.getElementById('documentInput');
+    const queryInput = document.getElementById('queryInput');
+    const chunkSize = document.getElementById('chunkSize');
+    const topK = document.getElementById('topK');
+    const runAllBtn = document.getElementById('runAllBtn');
+    const nextStepBtn = document.getElementById('nextStepBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const orb = document.getElementById('orb');
+
+    let currentStep = 0;
+    let chunks = [];
+    let retrieved = [];
+
+    function tokenize(text) {
+      return text
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, ' ')
+        .split(/\s+/)
+        .filter(word => word.length > 2 && !stopWords.has(word));
+    }
+
+    function splitIntoChunks(text, size) {
+      const words = text.trim().split(/\s+/).filter(Boolean);
+      const result = [];
+      for (let i = 0; i < words.length; i += size) {
+        result.push(words.slice(i, i + size).join(' '));
+      }
+      return result.map((content, index) => ({ id: index + 1, content }));
+    }
+
+    function scoreChunk(query, chunk) {
+      const qTokens = tokenize(query);
+      const cTokens = tokenize(chunk.content);
+      const cSet = new Set(cTokens);
+      let score = 0;
+
+      qTokens.forEach(token => {
+        if (cSet.has(token)) score += 3;
+        cTokens.forEach(cToken => {
+          if (cToken.includes(token) || token.includes(cToken)) score += 0.35;
+        });
+      });
+
+      const phraseBonus = qTokens.filter(token => chunk.content.toLowerCase().includes(token)).length;
+      score += phraseBonus;
+      return Math.min(100, Math.round(score * 7));
+    }
+
+    function pseudoVector(text) {
+      const tokens = tokenize(text).join('');
+      const values = [];
+      for (let i = 0; i < 8; i++) {
+        let sum = 0;
+        for (let j = i; j < tokens.length; j += 8) {
+          sum += tokens.charCodeAt(j) || 0;
+        }
+        values.push(18 + (sum % 82));
+      }
+      return values;
+    }
+
+    function updatePipeline(step) {
+      document.querySelectorAll('.pipe-node').forEach(node => {
+        const nodeStep = Number(node.dataset.step);
+        node.classList.toggle('active', nodeStep === step);
+        node.classList.toggle('done', nodeStep < step);
+      });
+
+      document.querySelectorAll('.step-card').forEach((card, index) => {
+        card.classList.toggle('visible', index + 1 <= step);
+      });
+    }
+
+    function renderStep1() {
+      const text = documentInput.value.trim();
+      document.getElementById('docPreview').textContent = text ? text.slice(0, 420) + (text.length > 420 ? '...' : '') : 'No document loaded yet.';
+    }
+
+    function renderChunks() {
+      chunks = splitIntoChunks(documentInput.value, Number(chunkSize.value));
+      const list = document.getElementById('chunkList');
+      if (!chunks.length) {
+        list.innerHTML = '<div class="empty-state">Add a document to create chunks.</div>';
+        return;
+      }
+      list.innerHTML = chunks.map(chunk => `
+        <div class="chunk-card">
+          <div class="chunk-meta"><span>Chunk ${chunk.id}</span><span>${chunk.content.split(/\s+/).length} words</span></div>
+          <p>${chunk.content}</p>
+        </div>
+      `).join('');
+    }
+
+    function renderVectors() {
+      const wrap = document.getElementById('vectorWrap');
+      const rows = chunks.slice(0, 5).map(chunk => {
+        const vector = pseudoVector(chunk.content);
+        return `
+          <div class="vector-row">
+            <div class="vector-label">Chunk ${chunk.id}</div>
+            <div class="vector">${vector.map(value => `<span class="vector-cell" style="--h:${value}%"></span>`).join('')}</div>
+          </div>
+        `;
+      }).join('');
+
+      const queryVector = pseudoVector(queryInput.value);
+      wrap.innerHTML = `
+        <div class="vector-row">
+          <div class="vector-label">Query</div>
+          <div class="vector">${queryVector.map(value => `<span class="vector-cell" style="--h:${value}%"></span>`).join('')}</div>
+        </div>
+        ${rows || '<div class="empty-state">No chunks available for embedding.</div>'}
+      `;
+    }
+
+    function renderRetrieval() {
+      const k = Number(topK.value);
+      retrieved = chunks
+        .map(chunk => ({ ...chunk, score: scoreChunk(queryInput.value, chunk) }))
+        .sort((a, b) => b.score - a.score)
+        .slice(0, k);
+
+      const list = document.getElementById('retrievalList');
+      if (!retrieved.length) {
+        list.innerHTML = '<div class="empty-state">No chunks retrieved yet.</div>';
+        return;
+      }
+
+      list.innerHTML = retrieved.map(chunk => `
+        <div class="chunk-card retrieved">
+          <div class="chunk-meta"><span>Retrieved Chunk ${chunk.id}</span><span>Similarity score: ${chunk.score}%</span></div>
+          <p>${chunk.content}</p>
+          <div class="score-bar"><div class="score-fill" style="width:${Math.max(8, chunk.score)}%"></div></div>
+        </div>
+      `).join('');
+    }
+
+    function renderAnswer() {
+      const answerEl = document.getElementById('generatedAnswer');
+      const citationsEl = document.getElementById('citations');
+
+      if (!retrieved.length) {
+        answerEl.textContent = 'No context was retrieved, so the simulator cannot generate a grounded answer.';
+        citationsEl.innerHTML = '';
+        return;
+      }
+
+      const query = queryInput.value.trim();
+      const topSentences = retrieved
+        .flatMap(chunk => chunk.content.split(/(?<=[.!?])\s+/).map(sentence => ({ sentence, id: chunk.id, score: scoreChunk(query, { content: sentence }) })))
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 4)
+        .map(item => item.sentence.trim())
+        .filter(Boolean);
+
+      const answer = `Based on the retrieved context, ${query ? query.charAt(0).toLowerCase() + query.slice(1).replace(/[?]$/, '') : 'the answer'} can be explained as follows: ${topSentences.join(' ')} In a RAG system, these retrieved chunks are passed to the generator as evidence, helping the response stay specific to the uploaded knowledge source rather than relying only on generic model memory.`;
+
+      answerEl.textContent = answer;
+      citationsEl.innerHTML = retrieved.map(chunk => `<span class="citation">Source: Chunk ${chunk.id}</span>`).join('');
+    }
+
+    function runStep(step) {
+      currentStep = Math.max(1, Math.min(5, step));
+      if (currentStep >= 1) renderStep1();
+      if (currentStep >= 2) renderChunks();
+      if (currentStep >= 3) renderVectors();
+      if (currentStep >= 4) renderRetrieval();
+      if (currentStep >= 5) renderAnswer();
+      updatePipeline(currentStep);
+    }
+
+    function reset() {
+      currentStep = 0;
+      chunks = [];
+      retrieved = [];
+      updatePipeline(0);
+      document.querySelectorAll('.step-card').forEach(card => card.classList.remove('visible'));
+    }
+
+    sampleSelect.addEventListener('change', () => {
+      const value = sampleSelect.value;
+      documentInput.value = samples[value] || '';
+      queryInput.value = defaultQuestions[value] || 'What are the most important points in this document?';
+      reset();
+    });
+
+    runAllBtn.addEventListener('click', () => runStep(5));
+    nextStepBtn.addEventListener('click', () => runStep(currentStep + 1));
+    resetBtn.addEventListener('click', reset);
+
+    [documentInput, queryInput, chunkSize, topK].forEach(input => {
+      input.addEventListener('input', () => {
+        if (currentStep > 0) runStep(currentStep);
+      });
+      input.addEventListener('change', () => {
+        if (currentStep > 0) runStep(currentStep);
+      });
+    });
+
+    window.addEventListener('mousemove', event => {
+      orb.style.left = event.clientX + 'px';
+      orb.style.top = event.clientY + 'px';
+    });
+
+    documentInput.value = samples.edge;
+    reset();
+  </script>
+</body>
+</html>
